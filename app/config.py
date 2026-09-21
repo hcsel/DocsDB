@@ -1,4 +1,3 @@
-# app/config.py
 from pathlib import Path
 
 # Где лежит БД

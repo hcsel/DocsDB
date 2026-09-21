@@ -14,8 +14,8 @@ from app.models import Document
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Справочник документов УИИ")
-        self.resize(1200, 700)
+        self.setWindowTitle("Справочник документов")
+        self.resize(1920, 1080)
 
         self._current_docs: list[Document] = []
 
@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         top = QHBoxLayout()
 
         self.search_edit = QLineEdit()
-        self.search_edit.setPlaceholderText("Поиск по названию, изменениям, пометкам...")
+        self.search_edit.setPlaceholderText("Поиск...")
         self.search_edit.textChanged.connect(self._refresh)
         top.addWidget(self.search_edit, stretch=1)
 
@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
         self.sheet_combo.currentIndexChanged.connect(self._refresh)
         top.addWidget(self.sheet_combo)
 
-        btn_reset = QPushButton("Сброс")
+        btn_reset = QPushButton("Сбросить фильтры")
         btn_reset.clicked.connect(self._reset_filters)
         top.addWidget(btn_reset)
 
@@ -128,10 +128,13 @@ class MainWindow(QMainWindow):
     def _fill_table(self, docs: list[Document]):
         self.model.removeRows(0, self.model.rowCount())
         for d in docs:
-            file_marker = ""
-            if d.file_path or d.file_name:
-                resolved = files.resolve_file(d.file_path, d.file_name)
-                file_marker = "✓" if resolved else "✗ не найден"
+            if d.file_path:
+                file_marker = "есть"
+            elif d.file_name:
+                file_marker = "имя"
+            else:
+                file_marker = ""
+
             row = [
                 QStandardItem(str(d.id)),
                 QStandardItem(d.sheet),
@@ -167,6 +170,13 @@ class MainWindow(QMainWindow):
     def _open_selected(self):
         d = self._selected_doc()
         if not d:
+            return
+        if not files.server_reachable():
+            QMessageBox.warning(
+                self, "Сервер недоступен",
+                "Файловый сервер 10.39.0.14 сейчас недоступен.\n"
+                "Проверьте подключение к сети или обратитесь к администратору."
+            )
             return
         path = files.resolve_file(d.file_path, d.file_name)
         if not path:
