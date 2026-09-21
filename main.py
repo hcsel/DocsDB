@@ -1,16 +1,18 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+# main.py
+import sys
+from PySide6.QtWidgets import QApplication
+from app import db
+from ui.main_window import MainWindow
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+def main():
+    db.init_db()
+    app = QApplication(sys.argv)
+    app.setApplicationName("Справочник УИИ")
+    w = MainWindow()
+    w.show()
+    sys.exit(app.exec())
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+if __name__ == "__main__":
+    main()
