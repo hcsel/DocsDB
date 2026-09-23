@@ -199,3 +199,50 @@ def delete(doc_id: int):
 def insert_many(docs: Iterable[Document]):
     for d in docs:
         insert(d)
+
+# ---------- дополнительные операции ----------
+
+def find_by_file_path(file_path: str) -> Optional[Document]:
+    """Ищет документ по полному физическому пути."""
+
+    with connect() as conn:
+        row = conn.execute(
+            """
+            SELECT *
+            FROM documents
+            WHERE file_path = ? COLLATE NOCASE
+            LIMIT 1
+            """,
+            (file_path,),
+        ).fetchone()
+
+    return row_to_document(row) if row else None
+
+
+def exists_by_file(
+    file_path: str,
+    exclude_id: Optional[int] = None,
+) -> bool:
+    """Проверяет, есть ли файл уже в базе."""
+
+    sql = """
+        SELECT 1
+        FROM documents
+        WHERE file_path = ? COLLATE NOCASE
+    """
+
+    params = [file_path]
+
+    if exclude_id is not None:
+        sql += " AND id != ?"
+        params.append(exclude_id)
+
+    sql += " LIMIT 1"
+
+    with connect() as conn:
+        row = conn.execute(
+            sql,
+            params,
+        ).fetchone()
+
+    return row is not None
