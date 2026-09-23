@@ -169,25 +169,31 @@ class MainWindow(QMainWindow):
 
     def _open_selected(self):
         d = self._selected_doc()
+
         if not d:
             return
-        if not files.server_reachable():
-            QMessageBox.warning(
-                self, "Сервер недоступен",
-                "Файловый сервер 10.39.0.14 сейчас недоступен.\n"
-                "Проверьте подключение к сети или обратитесь к администратору."
-            )
-            return
-        path = files.resolve_file(d.file_path, d.file_name)
+
+        path = files.resolve_file(
+            d.file_path,
+            d.file_name
+        )
+
         if not path:
             QMessageBox.warning(
-                self, "Файл не найден",
-                f"Не удалось найти файл:\n{d.file_path or d.file_name or '(нет ссылки)'}\n\n"
-                f"Проверьте базовую папку и имя файла.",
+                self,
+                "Файл не найден",
+                f"Не удалось найти файл:\n"
+                f"{d.file_path or d.file_name or '(нет ссылки)'}\n\n"
+                f"Проверьте путь к файлу и базовые папки."
             )
             return
+
         if not files.open_file(path):
-            QMessageBox.warning(self, "Ошибка", f"Не удалось открыть:\n{path}")
+            QMessageBox.warning(
+                self,
+                "Ошибка",
+                f"Не удалось открыть:\n{path}"
+            )
 
     def _open_folder(self):
         d = self._selected_doc()
