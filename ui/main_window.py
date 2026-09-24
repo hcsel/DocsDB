@@ -458,12 +458,12 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(
             "Справочник документов"
         )
-
+        screen = self.screen().availableGeometry()
         self.resize(
-            1920,
-            1080,
+            min(1600, screen.width() - 100),
+            min(1000, screen.height() - 100),
         )
-
+        self.setMinimumSize(800, 500)
         self._current_docs: list[Document] = []
 
         self._build_ui()
@@ -587,6 +587,11 @@ class MainWindow(QMainWindow):
         )
 
         self.table = QTableView()
+#настройка по ширине при изменении окна
+        self.table.setWordWrap(True)
+        self.table.setAlternatingRowColors(True)
+        self.table.setSortingEnabled(True)
+        self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
 
         self.table.setModel(
             self.model
@@ -626,25 +631,26 @@ class MainWindow(QMainWindow):
 
         header = self.table.horizontalHeader()
 
-        header.setSectionResizeMode(
-            6,
-            QHeaderView.Stretch,
-        )
+        # Все колонки тянутся пропорционально окну,
+        # но с разными весами — название и файл получают больше места.
+        for i in range(self.model.columnCount()):
+            header.setSectionResizeMode(i, QHeaderView.Interactive)
 
-        for i in [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            7,
-        ]:
+        header.setSectionResizeMode(6, QHeaderView.Stretch)
 
-            header.setSectionResizeMode(
-                i,
-                QHeaderView.ResizeToContents,
-            )
+        # ID, Дата, № — узкие
+        header.resizeSection(0, 60)  # ID
+        header.resizeSection(4, 100)  # Дата
+        header.resizeSection(5, 80)  # №
+
+        # Название — самое широкое
+        header.resizeSection(6, 400)  # Название
+
+        # Остальные — средние
+        header.resizeSection(1, 120)  # Раздел
+        header.resizeSection(2, 140)  # Категория
+        header.resizeSection(3, 120)  # Тип
+        header.resizeSection(7, 100)  # Файл
 
         root.addWidget(
             self.table,
