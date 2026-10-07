@@ -153,86 +153,34 @@ class MainWindow(QMainWindow):
             f"С файлом: {c['with_file']}"
         )
 
-    def _fill_table(
-            self,
-            docs: list[Document],
-    ):
-
-        self.model.removeRows(
-            0,
-            self.model.rowCount(),
-        )
+    def _fill_table(self, docs: list[Document]):
+        self.model.removeRows(0, self.model.rowCount())
 
         for d in docs:
-
-            path = files.resolve_file(
-                d.file_path,
-                d.file_name,
-            )
-
-            if path:
-                file_marker = "есть"
-
-            elif d.file_path or d.file_name:
+            if d.file_path or d.file_name:
                 file_marker = "ссылка"
-
             else:
                 file_marker = ""
 
             row = [
-
-                QStandardItem(
-                    str(d.id)
-                ),
-
-                QStandardItem(
-                    d.sheet
-                ),
-
-                QStandardItem(
-                    d.category
-                ),
-
-                QStandardItem(
-                    d.doc_type
-                ),
-
-                QStandardItem(
-                    d.doc_date or ""
-                ),
-
-                QStandardItem(
-                    d.doc_number
-                ),
-
-                QStandardItem(
-                    d.title
-                ),
-
-                QStandardItem(
-                    file_marker
-                ),
+                QStandardItem(str(d.id)),
+                QStandardItem(d.sheet),
+                QStandardItem(d.category),
+                QStandardItem(d.doc_type),
+                QStandardItem(d.doc_date or ""),
+                QStandardItem(d.doc_number),
+                QStandardItem(d.title),
+                QStandardItem(file_marker),
             ]
 
-            # Очень важно:
-            # ID хранится непосредственно в строке.
-
             for item in row:
-                item.setData(
-                    d.id,
-                    Qt.UserRole,
-                )
+                item.setData(d.id, Qt.UserRole)
 
             if d.needs_review:
-
                 for item in row:
-                    item.setBackground(
-                        Qt.yellow
-                    )
+                    item.setBackground(Qt.yellow)
 
-            self.model.appendRow(
-                row
-            )
+            self.model.appendRow(row)
 
 
 

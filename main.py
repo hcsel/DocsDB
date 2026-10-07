@@ -12,7 +12,7 @@ def main():
     print("2. QApplication создан")
     app.setApplicationName("Справочник УИИ")
     w = MainWindow()
-    print(f"3. MainWindow создан") #TODO долгий запуск нада ускорить
+    print(f"3. MainWindow создан")
     w.show()
     print("4. Окно показано")
     sys.exit(app.exec())
