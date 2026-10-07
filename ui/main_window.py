@@ -29,7 +29,7 @@ from PySide6.QtWidgets import (
 
 from app import db, files
 from app.models import Document
-
+from ui.dialogs.settings import SettingsDialog
 
 class DocumentDialog(QDialog):
     """
@@ -566,6 +566,24 @@ class MainWindow(QMainWindow):
         )
 
         root.addLayout(top)
+
+        #НАСТРОЙКИ_ИЗМЕНИТЬ
+        self.settings_button = QPushButton("Настройки")
+
+        self.settings_button.clicked.connect(
+            self._open_settings
+        )
+
+        top.addWidget(
+            self.settings_button
+        )
+
+
+
+
+
+
+
 
         # -----------------------------------------------------
         # Таблица
@@ -1216,3 +1234,11 @@ class MainWindow(QMainWindow):
                 pos
             )
         )
+
+    def _open_settings(self):
+        dialog = SettingsDialog(self)
+
+        if dialog.exec():
+                # Если корневая папка изменилась,
+                # можно обновить интерфейс.
+            self._refresh()
