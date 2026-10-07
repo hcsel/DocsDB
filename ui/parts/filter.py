@@ -113,7 +113,6 @@ class FilterBar(QWidget):
         self.changed.emit()
 
         # Геттеры текущих значений
-        # ---------------------------------------------------------
 
     def query(self) -> str:
             return self.search_edit.text().strip()

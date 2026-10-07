@@ -373,66 +373,46 @@ class DocumentDialog(QDialog):
 
         self.accept()
 
-    # ---------------------------------------------------------
-    # Получение модели
-    # ---------------------------------------------------------
-
+    # Получение модели документа
     def get_document(self) -> Document:
 
         date_value = None
-
         date = self.date_edit.date()
 
         if date != QDate(1900, 1, 1):
+            date_value = date.toString("yyyy-MM-dd")
 
-            date_value = date.toString(
-                "yyyy-MM-dd"
-            )
+        path = Path(self.file_edit.text().strip())
 
-        path = Path(
-            self.file_edit.text().strip()
-        )
+        # Пытаемся сохранить относительный путь внутри
+        # корневой папки документов. Если файл вне корня —
+        # сохраняем абсолютный (с пометкой, что требует проверки).
+
+        needs_review = False
+        review_reason = ""
+
+        try:
+            file_path_value = files.make_relative_path(path)
+        except ValueError:
+            file_path_value = str(path)
+            needs_review = True
+            review_reason = "Файл вне корневой папки документов"
 
         return Document(
-
-            id=(
-                self.document.id
-                if self.document
-                else None
-            ),
-
+            id=(self.document.id if self.document else None),
             sheet=self.sheet_edit.text().strip(),
-
             category=self.category_edit.text().strip(),
-
             doc_type=self.type_edit.text().strip(),
-
             doc_date=date_value,
-
             doc_number=self.number_edit.text().strip(),
-
             title=self.title_edit.text().strip(),
-
             changes=self.changes_edit.text().strip(),
-
             notes=self.notes_edit.toPlainText().strip(),
-
-            # НОВЫЙ ФОРМАТ:
-            # полный путь к физическому файлу
-            file_path=str(path),
-
+            file_path=file_path_value,  # относительный или абсолютный
             file_name=path.name,
-
-            raw_link=(
-                self.document.raw_link
-                if self.document
-                else ""
-            ),
-
+            raw_link=(self.document.raw_link if self.document else ""),
             link_kind="filename",
-
-            needs_review=False,
-
-            review_reason="",
+            needs_review=needs_review,
+            review_reason=review_reason,
         )
 
