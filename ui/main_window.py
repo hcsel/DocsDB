@@ -31,7 +31,7 @@ from app import db, files
 from app.models import Document
 from ui.dialogs.settings import SettingsDialog
 from ui.dialogs.change import DocumentDialog
-
+from ui.parts.filter import FilterBar
 
 class MainWindow(QMainWindow):
 
@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(800, 600)
         self._current_docs: list[Document] = []
         self._build_ui()
-        self._reload_filters()
+        self.filters.reload_filters()
         self._refresh()
 
     # ==========UI
@@ -58,14 +58,15 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central)
         root = QVBoxLayout(central)
 
-        # Поиск / фильтры
-        # -----------------------------------------------------
+        #верхняя панель filter
+        self.filters = FilterBar()
+        self.filters.changed.connect(self._refresh)
+        self.filters.addRequested.connect(self._add_document)
+        self.filters.settingsRequested.connect(self._open_settings)
 
-       
+        root.addWidget(self.filters)
 
-        # -----------------------------------------------------
         # Таблица
-        # -----------------------------------------------------
 
         self.model = QStandardItemModel()
 
@@ -153,106 +154,36 @@ class MainWindow(QMainWindow):
             stretch=1,
         )
 
-        # -----------------------------------------------------
         # Status bar
-        # -----------------------------------------------------
-
         self.status = QStatusBar()
+        self.setStatusBar(self.status)
 
-        self.setStatusBar(
-            self.status
-        )
+
+
+
+
+
 
     # =========================================================
     # Данные
     # =========================================================
 
-    def _reload_filters(self):
-
-        for combo, values in [
-
-            (
-                    self.category_combo,
-                    db.distinct_values(
-                        "category"
-                    ),
-            ),
-
-            (
-                    self.type_combo,
-                    db.distinct_values(
-                        "doc_type"
-                    ),
-            ),
-
-            (
-                    self.sheet_combo,
-                    db.distinct_values(
-                        "sheet"
-                    ),
-            ),
-        ]:
-
-            combo.blockSignals(
-                True
-            )
-
-            combo.clear()
-
-            combo.addItem(
-                "— все —",
-                "",
-            )
-
-            for value in values:
-                combo.addItem(
-                    value,
-                    value,
-                )
-
-            combo.blockSignals(
-                False
-            )
-
-    def _current_filter(
-            self,
-            combo,
-    ):
-
-        return (
-                combo.currentData()
-                or ""
-        )
-
+    # обновление
     def _refresh(self):
 
         docs = db.search(
-
-            query=self.search_edit.text().strip(),
-
-            category=self._current_filter(
-                self.category_combo
-            ),
-
-            doc_type=self._current_filter(
-                self.type_combo
-            ),
-
-            sheet=self._current_filter(
-                self.sheet_combo
-            ),
+            query=self.filters.query(),
+            category=self.filters.category(),
+            doc_type=self.filters.doc_type(),
+            sheet=self.filters.sheet(),
         )
 
         self._current_docs = docs
-
-        self._fill_table(
-            docs
-        )
+        self._fill_table(docs)
 
         c = db.counts()
 
         self.status.showMessage(
-
             f"Показано: {len(docs)} | "
             f"Всего: {c['total']} | "
             f"Требуют проверки: {c['needs_review']} | "
@@ -340,21 +271,7 @@ class MainWindow(QMainWindow):
                 row
             )
 
-    def _reset_filters(self):
 
-        self.search_edit.clear()
-
-        self.category_combo.setCurrentIndex(
-            0
-        )
-
-        self.type_combo.setCurrentIndex(
-            0
-        )
-
-        self.sheet_combo.setCurrentIndex(
-            0
-        )
 
     # =========================================================
     # Получение выбранного документа
@@ -399,7 +316,7 @@ class MainWindow(QMainWindow):
             document
         )
 
-        self._reload_filters()
+        self.filters.reload_filters()
 
         self._refresh()
 
@@ -433,7 +350,7 @@ class MainWindow(QMainWindow):
             updated
         )
 
-        self._reload_filters()
+        self.filters.reload_filters()
 
         self._refresh()
 
@@ -479,7 +396,7 @@ class MainWindow(QMainWindow):
             document.id
         )
 
-        self._reload_filters()
+        self.filters.reload_filters()
 
         self._refresh()
 
