@@ -1,6 +1,4 @@
-from pathlib import Path
-
-from PySide6.QtCore import Qt, QDate
+from PySide6.QtCore import Qt
 from PySide6.QtGui import (
     QStandardItemModel,
     QStandardItem,
@@ -10,21 +8,12 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QWidget,
     QVBoxLayout,
-    QHBoxLayout,
-    QLineEdit,
-    QComboBox,
     QTableView,
     QStatusBar,
-    QPushButton,
     QMessageBox,
     QMenu,
     QHeaderView,
     QDialog,
-    QFormLayout,
-    QDialogButtonBox,
-    QDateEdit,
-    QTextEdit,
-    QFileDialog,
 )
 
 from app import db, files
@@ -90,41 +79,15 @@ class MainWindow(QMainWindow):
         self.table.setSortingEnabled(True)
         self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
 
-        self.table.setModel(
-            self.model
-        )
+        self.table.setModel(self.model)
+        self.table.setSelectionBehavior(QTableView.SelectRows)
+        self.table.setSelectionMode(QTableView.SingleSelection)
+        self.table.setEditTriggers(QTableView.NoEditTriggers)
 
-        self.table.setSelectionBehavior(
-            QTableView.SelectRows
-        )
+        self.table.doubleClicked.connect(self._open_selected)
+        self.table.setContextMenuPolicy(Qt.CustomContextMenu)
 
-        self.table.setSelectionMode(
-            QTableView.SingleSelection
-        )
-
-        self.table.setEditTriggers(
-            QTableView.NoEditTriggers
-        )
-
-        self.table.setAlternatingRowColors(
-            True
-        )
-
-        self.table.setSortingEnabled(
-            True
-        )
-
-        self.table.doubleClicked.connect(
-            self._open_selected
-        )
-
-        self.table.setContextMenuPolicy(
-            Qt.CustomContextMenu
-        )
-
-        self.table.customContextMenuRequested.connect(
-            self._show_context_menu
-        )
+        self.table.customContextMenuRequested.connect(self._show_context_menu)
 
         header = self.table.horizontalHeader()
 
