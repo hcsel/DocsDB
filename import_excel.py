@@ -65,18 +65,31 @@ def format_date(value) -> str:
 
 
 def normalize_path(value) -> str:
-
+    """Чистит путь и отрезает всё до корневой папки 'БД документов'."""
     value = clean(value)
     if not value or value.isdigit():
         return ""
 
     value = value.strip('"')
 
-    # Исправление бага Excel: \\D:\... -> D:\...
-    if value.startswith("\\\\") and len(value) > 3:
-        if value[2].isalpha() and value[3] == ":":
-            value = value[2:]
+    # Приводим все слэши к одному виду для удобства поиска
+    val_normalized = value.replace("/", "\\")
 
+    # Ищем нашу корневую папку в пути
+    marker = "БД документов\\"
+    marker_lower = "бд документов\\"
+
+    # Ищем маркер без учета регистра
+    if marker_lower in val_normalized.lower():
+        # Разделяем строку по маркеру и берём то, что после него
+        # split(..., 1) значит, что делим только один раз
+        idx = val_normalized.lower().find(marker_lower)
+        if idx != -1:
+            relative_path = val_normalized[idx + len(marker_lower):]
+            return relative_path
+
+    # Если корневой папки в пути нет (например, файл лежит вне неё),
+    # возвращаем как есть (или можно вернуть пустую строку, если хотите такие отсеивать)
     return value
 
 
