@@ -1,8 +1,6 @@
 from pathlib import Path
 import json
 
-
-
 # Папки приложения
 
 APP_DIR = Path(__file__).resolve().parent.parent

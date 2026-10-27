@@ -1,4 +1,3 @@
-# app/db.py
 import sqlite3
 from contextlib import contextmanager
 from typing import Optional, Iterable
